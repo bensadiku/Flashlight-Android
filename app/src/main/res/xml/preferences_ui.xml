@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+                  xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceScreen
+            android:title="Settings"
+            android:icon="@drawable/ic_settings_accent"
+            android:summary="Settings are saved automatically">
+
+    </PreferenceScreen>
+    <PreferenceCategory android:title="TIMER">
+        <SwitchPreference
+                android:key="@string/enable_timer_key"
+                android:defaultValue="@bool/enable_timer_default"
+                android:title="@string/enable_timer_title"
+                android:icon="@drawable/ic_looks_one_black_24dp"
+                android:summary="@string/enable_timer_desc"/>
+        <ListPreference
+                android:title="@string/add_timer_title"
+                android:icon="@drawable/ic_looks_two_black_24dp"
+                android:key="@string/add_timer_key"
+
+                android:defaultValue="@string/add_timer_default"
+                android:dependency="@string/enable_timer_key"
+                android:entries="@array/listArray"
+                android:entryValues="@array/listValues"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="LIGHT">
+        <SwitchPreference
+                android:key="@string/enable_front_light_key"
+                android:defaultValue="@bool/enable_front_light_default"
+                android:icon="@drawable/ic_looks_3_black_24dp"
+                android:title="@string/enable_front_light_title"
+                android:summary="@string/enable_front_light_desc"/>
+
+        <SwitchPreference
+                android:key="@string/enable_screen_awake_key"
+                android:defaultValue="@bool/enable_screen_awake_default"
+                android:title="@string/enable_screen_awake_title"
+                android:icon="@drawable/ic_looks_4_black_24dp"
+                android:summary="@string/enable_screen_awake_desc"/>
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="NOTIFICATIONS">
+        <SwitchPreference
+                android:key="@string/enable_notifications_key"
+                android:defaultValue="@bool/enable_notifications_default"
+                android:title="@string/enable_notifications_title"
+                android:icon="@drawable/ic_looks_5_black_24dp"
+                android:summary="@string/enable_notifications_desc"/>
+    </PreferenceCategory>
+
+    <PreferenceScreen
+            android:title="@string/action_view_title"
+            android:key="@string/action_view_key"
+            android:icon="@drawable/ic_action_source"
+            android:summary="@string/action_view_desc">
+        <intent android:action="android.intent.action.VIEW"
+                android:data="@string/action_view_repo"/>
+    </PreferenceScreen>
+
+</PreferenceScreen>
