@@ -8,6 +8,8 @@ import com.bensadiku.flashlight.R
 
 /**
  * Preference helper class to get the values from the saved preferences
+ *
+ * Update: No longer in use, Room database will substitute this helper, will leave it here for testing purposes
  */
 class PreferenceHelper(private val context: Context) {
     private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)

@@ -9,9 +9,9 @@
             android:name=".Flashlight"
             android:launchMode="singleTop"
             android:allowBackup="true"
-            android:icon="@drawable/ic_flash_on_yellow"
+            android:icon="@mipmap/ic_flash_on"
             android:label="@string/app_name"
-            android:roundIcon="@drawable/ic_flash_on_yellow"
+            android:roundIcon="@mipmap/ic_flash_on"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">

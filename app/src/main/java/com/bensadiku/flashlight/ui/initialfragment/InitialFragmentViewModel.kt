@@ -1,4 +1,4 @@
-package com.bensadiku.flashlight.ui
+package com.bensadiku.flashlight.ui.initialfragment
 
 import android.Manifest
 import android.app.Application
@@ -8,16 +8,20 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
 import android.os.CountDownTimer
 import android.text.format.DateUtils
+import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import com.bensadiku.flashlight.utils.PreferenceHelper
+import com.bensadiku.flashlight.database.FlashlightDatabaseDao
+import com.bensadiku.flashlight.database.FlashlightEntity
+import kotlinx.coroutines.*
 
 
-class InitialFragmentViewModel(application: Application) : AndroidViewModel(application) {
+class InitialFragmentViewModel(private val flashlightDatabaseDao: FlashlightDatabaseDao, application: Application) :
+    AndroidViewModel(application) {
 
     companion object {
         private const val DONE = 0L
@@ -28,6 +32,9 @@ class InitialFragmentViewModel(application: Application) : AndroidViewModel(appl
         private const val CAMERA_BACK = "0"
     }
 
+    //Coroutines
+    private var viewModelJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     //CountDownTimer values
     private var countDownTimer: CountDownTimer? = null
@@ -84,6 +91,7 @@ class InitialFragmentViewModel(application: Application) : AndroidViewModel(appl
         hasCameraFlash = context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
 
         checkPermissions()
+        getPreferences()
     }
 
     /**
@@ -94,7 +102,10 @@ class InitialFragmentViewModel(application: Application) : AndroidViewModel(appl
      */
     private fun setupTimer(countDown: Long) {
         //CountDownTimer
-        countDownTimer = object : CountDownTimer(countDown, ONE_SECOND) {
+        countDownTimer = object : CountDownTimer(
+            countDown,
+            ONE_SECOND
+        ) {
             override fun onTick(millisUntilFinished: Long) {
                 _time.value = millisUntilFinished / ONE_SECOND
             }
@@ -105,38 +116,46 @@ class InitialFragmentViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    /**
-     * Will get preferences from the PreferenceHelperClass
-     */
-    fun getPreferences() {
-        val prefHelper = PreferenceHelper(context)
+    private fun getPreferences() {
+        uiScope.launch {
+            val pref = getPrefFromDB()
+            pref.observeForever {
+                _enableTimer.value = it?.enableTimer
+                _keepAwake.value = it?.screenAwake
+                _sendNotifications.value = it?.enableNotifications
 
-        _enableTimer.value = prefHelper.getBooleanPref(PreferenceHelper.BooleanPref.EnableTimer)
-        _keepAwake.value = prefHelper.getBooleanPref(PreferenceHelper.BooleanPref.KeepAwake)
-        _sendNotifications.value = prefHelper.getBooleanPref(PreferenceHelper.BooleanPref.SendNotifications)
+                //Check if the user changed the timer, and set it to the COUNTDOWN_TIME variable and setupTimer with it or with the default one
+                if (it?.addTimer != null) {
+                    COUNTDOWN_TIME = it.addTimer
+                }
+                setupTimer(COUNTDOWN_TIME)
 
-        //Check if the user changed the timer, and set it to the COUNTDOWN_TIME variable and setupTimer with it or with the default one
-        if (!prefHelper.getTimer(PreferenceHelper.Timer.AddTimer).isNullOrEmpty()) {
-            COUNTDOWN_TIME = prefHelper.getTimer(PreferenceHelper.Timer.AddTimer).toLong()
+                //checks the light type, if it's true use switched to front light
+                //else it's the back light
+                lightType = it?.lightType!!
+                cameraId = when (lightType) {
+                    true -> CAMERA_FRONT
+                    false -> CAMERA_BACK
+                }
+                Log.d("test", "changed")
+            }
         }
-        setupTimer(COUNTDOWN_TIME)
+    }
 
-
-        //checks the light type, if it's true use switched to front light
-        //else it's the back light
-        lightType = prefHelper.getBooleanPref(PreferenceHelper.BooleanPref.PickLight)
-        cameraId = when (lightType) {
-            true -> CAMERA_FRONT
-            false -> CAMERA_BACK
+    private suspend fun getPrefFromDB(): LiveData<FlashlightEntity?> {
+        return withContext(Dispatchers.IO) {
+            val pref = flashlightDatabaseDao.getPref()
+            pref
         }
     }
 
     /**
-     * Cancel the timer if the viewmodel is destroyed
+     * Cancel the timer and coroutines if the viewmodel is destroyed
      */
     override fun onCleared() {
         super.onCleared()
         countDownTimer?.cancel()
+        viewModelJob.cancel()
     }
 
     /**
