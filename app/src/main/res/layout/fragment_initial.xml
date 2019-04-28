@@ -5,17 +5,17 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.InitialFragment" android:id="@+id/activity_main_layout">
+        tools:context=".ui.initialfragment.InitialFragment" android:id="@+id/activity_main_layout">
 
     <ImageView
             android:id="@+id/activity_main_switch_image"
-            android:layout_width="wrap_content"
-            android:src="@drawable/ic_flash_off_yellow"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="0dp"
+            android:src="@mipmap/ic_flash_off"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@+id/activity_main_switch_button"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"/>
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/activity_main_settings_image"/>
     <Button
             android:id="@+id/activity_main_switch_button"
             android:layout_width="wrap_content"

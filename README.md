@@ -1,5 +1,5 @@
 # Flashlight-Android
-Flashlight App for Android devices using Kotlin, LiveData, ViewModel, Camera2 API, Preferences, AndroidX.
+Flashlight App for Android devices using Kotlin, LiveData, ViewModel, Camera2 API, Preferences, Room, Coroutines, AndroidX.
 
 
 minSdkVersion 23
@@ -18,7 +18,7 @@ Written in Kotlin version 1.3.30 using AndroidX libraries.
 
 
 TODO:
-1) Implement SQL + Room database to save user preferences.
+1) Support more versions.
 2) Fix any potential bugs.
 3) Implement more features
 

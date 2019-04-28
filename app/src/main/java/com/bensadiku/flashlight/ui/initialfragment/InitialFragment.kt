@@ -1,4 +1,4 @@
-package com.bensadiku.flashlight.ui
+package com.bensadiku.flashlight.ui.initialfragment
 
 import android.Manifest
 import android.app.PendingIntent
@@ -22,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import com.bensadiku.flashlight.Flashlight
 import com.bensadiku.flashlight.MainActivity
 import com.bensadiku.flashlight.R
+import com.bensadiku.flashlight.database.FlashlightDatabase
 
 const val CAMERA_REQUEST = 50
 
@@ -47,7 +48,14 @@ class InitialFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initialFragmentViewModel = ViewModelProviders.of(this).get(InitialFragmentViewModel::class.java)
+        //----Initializing viewmodel properties
+        val application = requireNotNull(this.activity).application
+        val flashlightDatabaseDao = FlashlightDatabase.getInstance(context!!).flashlightDatabaseDao()
+        val viewModelFactory =
+            InitialViewModelFactory(flashlightDatabaseDao, application)
+        initialFragmentViewModel = ViewModelProviders.of(this, viewModelFactory)
+            .get(InitialFragmentViewModel::class.java)
+
 
         notificationManager = NotificationManagerCompat.from(context!!)
 
@@ -84,10 +92,10 @@ class InitialFragment : Fragment() {
          */
         initialFragmentViewModel.flashLightStatus.observe(this, Observer { flashLightStatus ->
             if (flashLightStatus) {
-                imageSwitch.setImageResource(R.drawable.ic_flash_on_yellow)
+                imageSwitch.setImageResource(R.mipmap.ic_flash_on)
                 sendOnTimerChannel1(true)
             } else {
-                imageSwitch.setImageResource(R.drawable.ic_flash_off_yellow)
+                imageSwitch.setImageResource(R.mipmap.ic_flash_off)
                 sendOnTimerChannel1(false)
             }
         })
@@ -162,10 +170,11 @@ class InitialFragment : Fragment() {
             if (sendNotification) {
                 val activityIntent = Intent(context, MainActivity::class.java)
                 activityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                val contentIntent = PendingIntent.getActivity(context, 0, activityIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                val contentIntent =
+                    PendingIntent.getActivity(context, 0, activityIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
                 val notification = NotificationCompat.Builder(context!!, Flashlight.TIMER_CHANNEL_1)
-                    .setSmallIcon(R.drawable.ic_flash_on_yellow)
+                    .setSmallIcon(R.mipmap.ic_flash_on)
                     .setContentTitle("Light is on!")
                     .setContentText("Tap to go back")
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -178,7 +187,7 @@ class InitialFragment : Fragment() {
             } else {
                 notificationManager?.cancel(1)
             }
-        }else if(!sendNotification){
+        } else if (!sendNotification) {
             notificationManager?.cancel(1)
         }
     }
@@ -196,15 +205,5 @@ class InitialFragment : Fragment() {
                 Toast.makeText(context, "Permission Denied for the Camera", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    /**
-     * We check preferences every time fragment is resumed
-     * Not ideal, will implement a SQL+ROOM db in the future and observe the livedata for changes on the db
-     * For now, it works, will keep it!
-     */
-    override fun onResume() {
-        super.onResume()
-        initialFragmentViewModel.getPreferences()
     }
 }
